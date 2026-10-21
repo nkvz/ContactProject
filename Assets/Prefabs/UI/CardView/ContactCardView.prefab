@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 5562391782833407749}
   - component: {fileID: 655757349791392330}
   - component: {fileID: 1509878474979228045}
+  - component: {fileID: 9100000000000000001}
   m_Layer: 5
   m_Name: ContactCardView
   m_TagString: Untagged
@@ -177,7 +178,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1100, y: 125}
+  m_SizeDelta: {x: 1100, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5562391782833407749
 CanvasRenderer:
@@ -243,6 +244,26 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &9100000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1884450453384055828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4969174a6bb944119129289a36b643e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactCardView
+  _nameText: {fileID: 2318106896283446912}
+  _emailText: {fileID: 183002228579346948}
+  _ipText: {fileID: 1801216956889698581}
+  _avatarImage: {fileID: 4967186392174917003}
+  _addFavoritesButton: {fileID: 1894343127161749152}
+  _favoriteAddedSprite: {fileID: 21300000, guid: 6e98ccdaf60fb4dff948301555bf311e, type: 3}
+  _favoriteNotAddedSprite: {fileID: 21300000, guid: cb3c583f9579f425fb503a796ad9e3df, type: 3}
+  _profileButton: {fileID: 3107668998390083606}
 --- !u!1 &3100084901935679247
 GameObject:
   m_ObjectHideFlags: 0
@@ -468,7 +489,7 @@ GameObject:
   - component: {fileID: 286384161545346029}
   - component: {fileID: 3107668998390083606}
   m_Layer: 5
-  m_Name: Profile
+  m_Name: ToProfile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -576,81 +597,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!1 &4682611515868683854
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5016567858872918628}
-  - component: {fileID: 2050555458098468733}
-  - component: {fileID: 2230714399822169941}
-  m_Layer: 5
-  m_Name: view
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &5016567858872918628
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4682611515868683854}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6372130678636931270}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 80, y: 77}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &2050555458098468733
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4682611515868683854}
-  m_CullTransparentMesh: 1
---- !u!114 &2230714399822169941
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4682611515868683854}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 534d0c3bb9b7145b5a4aa7ede90f622b, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &5961926083172391074
 GameObject:
   m_ObjectHideFlags: 0
@@ -893,7 +839,7 @@ GameObject:
   - component: {fileID: 2760058788839664911}
   - component: {fileID: 1894343127161749152}
   m_Layer: 5
-  m_Name: Favorite
+  m_Name: AddFavorites
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -910,8 +856,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 5016567858872918628}
+  m_Children: []
   m_Father: {fileID: 7610444280749327111}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -940,14 +885,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.46226418, g: 0.45572272, b: 0.45572272, a: 0.05490196}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: cb3c583f9579f425fb503a796ad9e3df, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
