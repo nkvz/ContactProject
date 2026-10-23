@@ -10235,8 +10235,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UIController_ShowProfile_m6BE6906F939D76
 		GameObject_SetActive_m638E92E1E75E519E5B24CF150B08CA8E0CDFAB92(L_3, (bool)1, NULL);
 		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_4 = __this->____navigationBar;
 		NullCheck(L_4);
-		GameObject_SetActive_m638E92E1E75E519E5B24CF150B08CA8E0CDFAB92(L_4, (bool)1, NULL);
-		UIController_SetNavigationState_m418329E27331B3D11A946DE3AD39B9FEE741645A(__this, (bool)0, (bool)0, NULL);
+		GameObject_SetActive_m638E92E1E75E519E5B24CF150B08CA8E0CDFAB92(L_4, (bool)0, NULL);
 		return;
 	}
 }
@@ -10258,20 +10257,20 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UIController_SetNavigationState_m418329E
 		if (L_1)
 		{
 			G_B2_0 = L_0;
-			goto IL_0011;
+			goto IL_000c;
 		}
 		G_B1_0 = L_0;
 	}
 	{
-		Sprite_tAFF74BC83CD68037494CB0B4F28CBDF8971CAB99* L_2 = __this->____spriteNavLeft;
-		G_B3_0 = L_2;
+		G_B3_0 = ((Sprite_tAFF74BC83CD68037494CB0B4F28CBDF8971CAB99*)(NULL));
 		G_B3_1 = G_B1_0;
 		goto IL_0012;
 	}
 
-IL_0011:
+IL_000c:
 	{
-		G_B3_0 = ((Sprite_tAFF74BC83CD68037494CB0B4F28CBDF8971CAB99*)(NULL));
+		Sprite_tAFF74BC83CD68037494CB0B4F28CBDF8971CAB99* L_2 = __this->____spriteNavLeft;
+		G_B3_0 = L_2;
 		G_B3_1 = G_B2_0;
 	}
 
@@ -10284,20 +10283,20 @@ IL_0012:
 		if (L_4)
 		{
 			G_B5_0 = L_3;
-			goto IL_0028;
+			goto IL_0023;
 		}
 		G_B4_0 = L_3;
 	}
 	{
-		Sprite_tAFF74BC83CD68037494CB0B4F28CBDF8971CAB99* L_5 = __this->____spriteNavRight;
-		G_B6_0 = L_5;
+		G_B6_0 = ((Sprite_tAFF74BC83CD68037494CB0B4F28CBDF8971CAB99*)(NULL));
 		G_B6_1 = G_B4_0;
 		goto IL_0029;
 	}
 
-IL_0028:
+IL_0023:
 	{
-		G_B6_0 = ((Sprite_tAFF74BC83CD68037494CB0B4F28CBDF8971CAB99*)(NULL));
+		Sprite_tAFF74BC83CD68037494CB0B4F28CBDF8971CAB99* L_5 = __this->____spriteNavRight;
+		G_B6_0 = L_5;
 		G_B6_1 = G_B5_0;
 	}
 
