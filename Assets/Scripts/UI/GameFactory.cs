@@ -4,16 +4,11 @@ public class GameFactory : MonoBehaviour
 {
     [SerializeField] private ContactCardView _contactCardPrefab;
 
-    public ContactCardView CreateContactCard(Transform parent, int number)
-    {
-        if (_contactCardPrefab == null)
-        {
-            Debug.LogError("GameFactory: ContactCardView prefab is not assigned.", this);
-            return null;
-        }
+    public float CardHeight => _contactCardPrefab != null ? ((RectTransform)_contactCardPrefab.transform).rect.height : 120f;
 
+    public ContactCardView CreateContactCard(Transform parent)
+    {
         ContactCardView card = Instantiate(_contactCardPrefab, parent, false);
-        card.ShowPreview(number);
         return card;
     }
 }

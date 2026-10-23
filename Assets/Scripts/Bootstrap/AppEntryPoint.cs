@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,130 +7,176 @@ public class AppEntryPoint
 {
     private readonly GameFactory _gameFactory;
     private readonly MainScreen _mainScreen;
-    private readonly GameObject _mainPage;
-    private readonly FavoritesScreen _favoritesScreen;
-    private readonly GameObject _favoritesPage;
     private readonly ProfileScreen _profileScreen;
-    private readonly GameObject _profilePage;
+    private readonly FavoritesScreen _favoritesScreen;
+    private readonly UIController _uiController;
+    private readonly ContactRepository _contacts = new ContactRepository();
+    private readonly AvatarService _avatars = new AvatarService();
+    private readonly AvatarAssignmentStore _avatarAssignments = new AvatarAssignmentStore();
     private readonly HashSet<int> _favoriteIds = new HashSet<int>();
-    private const string FavoritesKey = "favorite_contact_ids";
-    private bool _returnToFavorites;
+    private readonly List<Contact> _favoriteContacts = new List<Contact>();
 
-    public AppEntryPoint(GameFactory gameFactory, MainScreen mainScreen, GameObject mainPage, FavoritesScreen favoritesScreen, GameObject favoritesPage, ProfileScreen profileScreen, GameObject profilePage)
+    private bool _returnToFavorites;
+    private int _currentProfileId;
+
+    public AppEntryPoint(GameFactory gameFactory, MainScreen mainScreen, ProfileScreen profileScreen, FavoritesScreen favoritesScreen, UIController uiController)
     {
         _gameFactory = gameFactory;
         _mainScreen = mainScreen;
-        _mainPage = mainPage;
-        _favoritesScreen = favoritesScreen;
-        _favoritesPage = favoritesPage;
         _profileScreen = profileScreen;
-        _profilePage = profilePage;
+        _favoritesScreen = favoritesScreen;
+        _uiController = uiController;
     }
 
-    public void Run()
+    public IEnumerator Initialize()
     {
         LoadFavorites();
         _mainScreen.FavoriteRequested += OnFavoriteRequested;
         _mainScreen.ProfileRequested += OnProfileRequested;
-        _mainScreen.FavoritesRequested += OnFavoritesRequested;
-        _favoritesScreen.HomeRequested += OnHomeRequested;
         _favoritesScreen.FavoriteRequested += OnFavoriteRequested;
         _favoritesScreen.ProfileRequested += OnProfileRequested;
         _profileScreen.FavoriteRequested += OnFavoriteRequested;
-        _profileScreen.BackRequested += OnBackRequested;
-        _favoritesPage.SetActive(false);
-        _profilePage.SetActive(false);
-        _mainPage.SetActive(true);
-        _mainScreen.ShowPreviewCards(_gameFactory, 15);
-        foreach (int contactId in _favoriteIds)
-            _mainScreen.SetFavoriteState(contactId, true);
+        _uiController.HomeRequested += OnHomeRequested;
+        _uiController.FavoritesRequested += OnFavoritesRequested;
+        _uiController.BackRequested += OnBackRequested;
+
+        _uiController.ShowMain();
+
+        yield return _contacts.Load();
+        _avatarAssignments.Initialize(_contacts.Contacts);
+        _mainScreen.ShowContacts(_gameFactory, _contacts.Contacts, GetAvatar, IsFavorite);
+
+        if (_uiController.IsFavoritesVisible)
+            RefreshFavorites();
+
+        yield return _avatars.Load();
+        _mainScreen.RefreshVisible();
+        _favoritesScreen.RefreshVisible();
+
+        if (_uiController.IsProfileVisible && _contacts.TryGet(_currentProfileId, out Contact contact))
+            _profileScreen.SetIcon(GetAvatar(contact.id));
     }
 
     public void Dispose()
     {
         _mainScreen.FavoriteRequested -= OnFavoriteRequested;
         _mainScreen.ProfileRequested -= OnProfileRequested;
-        _mainScreen.FavoritesRequested -= OnFavoritesRequested;
-        _favoritesScreen.HomeRequested -= OnHomeRequested;
         _favoritesScreen.FavoriteRequested -= OnFavoriteRequested;
         _favoritesScreen.ProfileRequested -= OnProfileRequested;
         _profileScreen.FavoriteRequested -= OnFavoriteRequested;
-        _profileScreen.BackRequested -= OnBackRequested;
+        _uiController.HomeRequested -= OnHomeRequested;
+        _uiController.FavoritesRequested -= OnFavoritesRequested;
+        _uiController.BackRequested -= OnBackRequested;
+    }
+
+    private Sprite GetAvatar(int contactId)
+    {
+        return _avatars.GetSprite(_avatarAssignments.GetSlot(contactId));
+    }
+
+    private bool IsFavorite(int contactId)
+    {
+        return _favoriteIds.Contains(contactId);
     }
 
     private void OnFavoriteRequested(int contactId)
     {
-        bool isFavorite = _favoriteIds.Add(contactId);
+        if (!_contacts.TryGet(contactId, out Contact contact))
+            return;
+
+        bool isFavorite = _favoriteIds.Add(contact.id);
         if (!isFavorite)
-            _favoriteIds.Remove(contactId);
+            _favoriteIds.Remove(contact.id);
 
         SaveFavorites();
+        _mainScreen.SetFavoriteState(contact.id, isFavorite);
+        _favoritesScreen.SetFavoriteState(contact.id, isFavorite);
 
-        _mainScreen.SetFavoriteState(contactId, isFavorite);
-        _profileScreen.SetFavorite(isFavorite);
-        if (_favoritesPage.activeSelf)
-            _favoritesScreen.ShowFavorites(_gameFactory, _favoriteIds);
+        if (_uiController.IsProfileVisible && _currentProfileId == contact.id)
+            _profileScreen.SetFavorite(isFavorite);
+
+        if (_uiController.IsFavoritesVisible)
+            RefreshFavorites();
     }
 
     private void OnProfileRequested(int contactId)
     {
-        _returnToFavorites = _favoritesPage.activeSelf;
-        _mainPage.SetActive(false);
-        _favoritesPage.SetActive(false);
-        _profilePage.SetActive(true);
-        _profileScreen.ShowPreview(contactId, _favoriteIds.Contains(contactId));
+        if (!_contacts.TryGet(contactId, out Contact contact))
+            return;
+
+        _currentProfileId = contact.id;
+        _returnToFavorites = _uiController.IsFavoritesVisible;
+        _uiController.ShowProfile();
+        _profileScreen.Show(contact, IsFavorite(contact.id), GetAvatar(contact.id));
     }
 
     private void OnBackRequested()
     {
-        _profilePage.SetActive(false);
         if (_returnToFavorites)
             ShowFavoritesPage();
         else
-            _mainPage.SetActive(true);
+            OnHomeRequested();
     }
 
     private void OnFavoritesRequested()
     {
-        _mainPage.SetActive(false);
         ShowFavoritesPage();
     }
 
     private void OnHomeRequested()
     {
-        _favoritesPage.SetActive(false);
-        _mainPage.SetActive(true);
+        _uiController.ShowMain();
+        _mainScreen.RefreshVisible();
     }
 
     private void ShowFavoritesPage()
     {
-        _favoritesPage.SetActive(true);
-        _favoritesScreen.ShowFavorites(_gameFactory, _favoriteIds);
+        _uiController.ShowFavorites();
+        RefreshFavorites();
+    }
+
+    private void RefreshFavorites()
+    {
+        _favoriteContacts.Clear();
+        foreach (Contact contact in _contacts.Contacts)
+        {
+            if (_favoriteIds.Contains(contact.id))
+                _favoriteContacts.Add(contact);
+        }
+
+        _favoritesScreen.ShowFavorites(_gameFactory, _favoriteContacts, GetAvatar, IsFavorite);
     }
 
     private void LoadFavorites()
     {
-        string json = PlayerPrefs.GetString(FavoritesKey, string.Empty);
+        string json = PlayerPrefs.GetString(AppDataReset.FavoritesKey, string.Empty);
         if (string.IsNullOrEmpty(json))
             return;
 
-        FavoriteIdsData data = JsonUtility.FromJson<FavoriteIdsData>(json);
-        if (data?.ids == null)
-            return;
+        try
+        {
+            FavoriteIdsData data = JsonUtility.FromJson<FavoriteIdsData>(json);
+            if (data?.ids == null)
+                return;
 
-        foreach (int contactId in data.ids)
-            _favoriteIds.Add(contactId);
+            foreach (int contactId in data.ids)
+                _favoriteIds.Add(contactId);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogWarning($"AppEntryPoint: favorites cache is invalid: {exception.Message}");
+        }
     }
 
     private void SaveFavorites()
     {
         FavoriteIdsData data = new FavoriteIdsData { ids = new int[_favoriteIds.Count] };
         _favoriteIds.CopyTo(data.ids);
-        PlayerPrefs.SetString(FavoritesKey, JsonUtility.ToJson(data));
+        PlayerPrefs.SetString(AppDataReset.FavoritesKey, JsonUtility.ToJson(data));
         PlayerPrefs.Save();
     }
 
-    [System.Serializable]
+    [Serializable]
     private class FavoriteIdsData
     {
         public int[] ids;

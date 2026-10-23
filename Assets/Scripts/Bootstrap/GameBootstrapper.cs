@@ -1,38 +1,40 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameBootstrapper : MonoBehaviour
 {
     [SerializeField] private GameFactory _gameFactory;
     [SerializeField] private MainScreen _mainScreen;
-    [SerializeField] private GameObject _mainPage;
-    [SerializeField] private FavoritesScreen _favoritesScreen;
-    [SerializeField] private GameObject _favoritesPage;
     [SerializeField] private ProfileScreen _profileScreen;
-    [SerializeField] private GameObject _profilePage;
+    [SerializeField] private FavoritesScreen _favoritesScreen;
+    [SerializeField] private UIController _uiController;
 
     private AppEntryPoint _entryPoint;
 
     private void Awake()
     {
-        if (_gameFactory == null || _mainScreen == null || _mainPage == null ||
-            _favoritesScreen == null || _favoritesPage == null || _profileScreen == null || _profilePage == null)
-        {
-            Debug.LogError("GameBootstrapper: screen and factory references must be assigned.", this);
-            enabled = false;
-            return;
-        }
-
-        _entryPoint = new AppEntryPoint(_gameFactory, _mainScreen, _mainPage,
-            _favoritesScreen, _favoritesPage, _profileScreen, _profilePage);
+        _entryPoint = new AppEntryPoint(_gameFactory, _mainScreen, _profileScreen, _favoritesScreen, _uiController);
+        _uiController.ResetDataRequested += OnResetDataRequested;
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
-        _entryPoint.Run();
+        if (_entryPoint != null)
+            yield return _entryPoint.Initialize();
     }
 
     private void OnDestroy()
     {
+        _uiController.ResetDataRequested -= OnResetDataRequested;
         _entryPoint?.Dispose();
+    }
+
+    private void OnResetDataRequested()
+    {
+        if (!AppDataReset.Clear())
+            return;
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
