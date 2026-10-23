@@ -19,10 +19,15 @@ public class UIController : MonoBehaviour
     [SerializeField] private Sprite _spriteNavLeft;
     [SerializeField] private Sprite _spriteNavRight;
 
+    private GameObject _contactsStatusPanel;
+    private TMP_Text _contactsStatusText;
+    private Button _retryContactsButton;
+
     public event Action HomeRequested;
     public event Action FavoritesRequested;
     public event Action BackRequested;
     public event Action ResetDataRequested;
+    public event Action RetryContactsRequested;
 
     public bool IsFavoritesVisible => _favoritesPage.activeSelf;
     public bool IsProfileVisible => _profilePage.activeSelf;
@@ -40,6 +45,7 @@ public class UIController : MonoBehaviour
         _favoritesButton.onClick.AddListener(OnFavoritesClicked);
         _backButton.onClick.AddListener(OnBackClicked);
         _resetDataButton.onClick.AddListener(OnResetDataClicked);
+        CreateContactsStatusPanel();
     }
 
     public void ShowMain()
@@ -80,6 +86,83 @@ public class UIController : MonoBehaviour
         _navRight.color = Color.white;
     }
 
+    public void ShowContactsLoading()
+    {
+        _contactsStatusPanel.SetActive(true);
+        _contactsStatusPanel.transform.SetAsLastSibling();
+        _contactsStatusText.text = "Loading employee data...";
+        _retryContactsButton.gameObject.SetActive(false);
+    }
+
+    public void ShowContactsError(string message)
+    {
+        _contactsStatusPanel.SetActive(true);
+        _contactsStatusPanel.transform.SetAsLastSibling();
+        _contactsStatusText.text = message;
+        _retryContactsButton.gameObject.SetActive(true);
+    }
+
+    public void HideContactsLoading()
+    {
+        _contactsStatusPanel.SetActive(false);
+    }
+
+    private void CreateContactsStatusPanel()
+    {
+        Canvas canvas = _mainPage.GetComponentInParent<Canvas>();
+        GameObject panel = new GameObject("ContactsStatusPanel", typeof(RectTransform), typeof(Image));
+        panel.transform.SetParent(canvas.transform, false);
+        RectTransform panelRect = (RectTransform)panel.transform;
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        panel.GetComponent<Image>().color = new Color(0.08f, 0.1f, 0.14f, 0.94f);
+        _contactsStatusPanel = panel;
+
+        GameObject message = new GameObject("Message", typeof(RectTransform), typeof(TextMeshProUGUI));
+        message.transform.SetParent(panel.transform, false);
+        RectTransform messageRect = (RectTransform)message.transform;
+        messageRect.anchorMin = new Vector2(0.1f, 0.5f);
+        messageRect.anchorMax = new Vector2(0.9f, 0.5f);
+        messageRect.sizeDelta = new Vector2(0f, 180f);
+        messageRect.anchoredPosition = new Vector2(0f, 70f);
+        _contactsStatusText = message.GetComponent<TextMeshProUGUI>();
+        _contactsStatusText.fontSize = 38f;
+        _contactsStatusText.alignment = TextAlignmentOptions.Center;
+        _contactsStatusText.raycastTarget = false;
+
+        GameObject retry = new GameObject("RetryButton", typeof(RectTransform), typeof(Image), typeof(Button));
+        retry.transform.SetParent(panel.transform, false);
+        RectTransform retryRect = (RectTransform)retry.transform;
+        retryRect.anchorMin = new Vector2(0.5f, 0.5f);
+        retryRect.anchorMax = new Vector2(0.5f, 0.5f);
+        retryRect.sizeDelta = new Vector2(320f, 100f);
+        retryRect.anchoredPosition = new Vector2(0f, -90f);
+        retry.GetComponent<Image>().color = new Color(0.22f, 0.36f, 0.55f, 1f);
+        _retryContactsButton = retry.GetComponent<Button>();
+        _retryContactsButton.onClick.AddListener(OnRetryContactsClicked);
+
+        GameObject label = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+        label.transform.SetParent(retry.transform, false);
+        RectTransform labelRect = (RectTransform)label.transform;
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.offsetMin = Vector2.zero;
+        labelRect.offsetMax = Vector2.zero;
+        TextMeshProUGUI labelText = label.GetComponent<TextMeshProUGUI>();
+        labelText.text = "RETRY";
+        labelText.fontSize = 38f;
+        labelText.alignment = TextAlignmentOptions.Center;
+        labelText.raycastTarget = false;
+        panel.SetActive(false);
+    }
+
+    private void OnRetryContactsClicked()
+    {
+        RetryContactsRequested?.Invoke();
+    }
+
     private void OnHomeClicked()
     {
         HomeRequested?.Invoke();
@@ -106,5 +189,7 @@ public class UIController : MonoBehaviour
         _favoritesButton.onClick.RemoveListener(OnFavoritesClicked);
         _backButton.onClick.RemoveListener(OnBackClicked);
         _resetDataButton.onClick.RemoveListener(OnResetDataClicked);
+        if (_retryContactsButton != null)
+            _retryContactsButton.onClick.RemoveListener(OnRetryContactsClicked);
     }
 }

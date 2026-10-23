@@ -14,6 +14,7 @@ public class ContactRepository
     private readonly List<Contact> _contacts = new List<Contact>();
 
     public IReadOnlyList<Contact> Contacts => _contacts;
+    public ContactLoadResult LastResult { get; private set; }
 
     public bool TryGet(int contactId, out Contact contact)
     {
@@ -22,6 +23,7 @@ public class ContactRepository
 
     public IEnumerator Load()
     {
+        LastResult = ContactLoadResult.None;
         if (File.Exists(_cachePath))
         {
             bool loadedFromCache = false;
@@ -35,7 +37,10 @@ public class ContactRepository
             }
 
             if (loadedFromCache)
+            {
+                LastResult = ContactLoadResult.Success;
                 yield break;
+            }
         }
 
         using (UnityWebRequest request = UnityWebRequest.Get(DataUrl))
@@ -45,6 +50,7 @@ public class ContactRepository
 
             if (request.result != UnityWebRequest.Result.Success)
             {
+                LastResult = ContactLoadResult.DownloadFailed;
                 Debug.LogError($"ContactRepository: download failed: {request.error}");
                 yield break;
             }
@@ -52,6 +58,7 @@ public class ContactRepository
             string json = request.downloadHandler.text;
             if (!Parse(json))
             {
+                LastResult = ContactLoadResult.InvalidData;
                 Debug.LogError("ContactRepository: downloaded file is not valid contact JSON.");
                 yield break;
             }
@@ -64,6 +71,8 @@ public class ContactRepository
             {
                 Debug.LogWarning($"ContactRepository: cache write failed: {exception.Message}");
             }
+
+            LastResult = ContactLoadResult.Success;
         }
     }
 
@@ -95,4 +104,12 @@ public class ContactRepository
 
         return _contacts.Count > 0;
     }
+}
+
+public enum ContactLoadResult
+{
+    None,
+    Success,
+    DownloadFailed,
+    InvalidData
 }

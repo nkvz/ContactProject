@@ -18,6 +18,7 @@ public class AppEntryPoint
 
     private bool _returnToFavorites;
     private int _currentProfileId;
+    private bool _retryRequested;
 
     public AppEntryPoint(GameFactory gameFactory, MainScreen mainScreen, ProfileScreen profileScreen, FavoritesScreen favoritesScreen, UIController uiController)
     {
@@ -39,10 +40,29 @@ public class AppEntryPoint
         _uiController.HomeRequested += OnHomeRequested;
         _uiController.FavoritesRequested += OnFavoritesRequested;
         _uiController.BackRequested += OnBackRequested;
+        _uiController.RetryContactsRequested += OnRetryContactsRequested;
+        _avatars.AvatarLoaded += OnAvatarLoaded;
 
         _uiController.ShowMain();
+        _uiController.ShowContactsLoading();
 
-        yield return _contacts.Load();
+        while (_contacts.LastResult != ContactLoadResult.Success)
+        {
+            yield return _contacts.Load();
+            if (_contacts.LastResult == ContactLoadResult.Success)
+                break;
+
+            string message = _contacts.LastResult == ContactLoadResult.InvalidData
+                ? "Employee data could not be read. Please try again."
+                : "Could not download employee data. Check your connection and try again.";
+            _uiController.ShowContactsError(message);
+            _retryRequested = false;
+            while (!_retryRequested)
+                yield return null;
+            _uiController.ShowContactsLoading();
+        }
+
+        _uiController.HideContactsLoading();
         _avatarAssignments.Initialize(_contacts.Contacts);
         _mainScreen.ShowContacts(_gameFactory, _contacts.Contacts, GetAvatar, IsFavorite);
 
@@ -50,11 +70,6 @@ public class AppEntryPoint
             RefreshFavorites();
 
         yield return _avatars.Load();
-        _mainScreen.RefreshVisible();
-        _favoritesScreen.RefreshVisible();
-
-        if (_uiController.IsProfileVisible && _contacts.TryGet(_currentProfileId, out Contact contact))
-            _profileScreen.SetIcon(GetAvatar(contact.id));
     }
 
     public void Dispose()
@@ -67,6 +82,22 @@ public class AppEntryPoint
         _uiController.HomeRequested -= OnHomeRequested;
         _uiController.FavoritesRequested -= OnFavoritesRequested;
         _uiController.BackRequested -= OnBackRequested;
+        _uiController.RetryContactsRequested -= OnRetryContactsRequested;
+        _avatars.AvatarLoaded -= OnAvatarLoaded;
+    }
+
+    private void OnRetryContactsRequested()
+    {
+        _retryRequested = true;
+    }
+
+    private void OnAvatarLoaded(int slot)
+    {
+        _mainScreen.RefreshVisible();
+        _favoritesScreen.RefreshVisible();
+
+        if (_uiController.IsProfileVisible && _avatarAssignments.GetSlot(_currentProfileId) == slot)
+            _profileScreen.SetIcon(_avatars.GetSprite(slot));
     }
 
     private Sprite GetAvatar(int contactId)
