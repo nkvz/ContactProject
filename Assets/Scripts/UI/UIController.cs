@@ -74,14 +74,13 @@ public class UIController : MonoBehaviour
         _mainPage.SetActive(false);
         _favoritesPage.SetActive(false);
         _profilePage.SetActive(true);
-        _navigationBar.SetActive(true);
-        SetNavigationState(false, false);
+        _navigationBar.SetActive(false);
     }
 
     private void SetNavigationState(bool isMainSelected, bool isFavoritesSelected)
     {
-        _navLeft.sprite = isMainSelected ? null : _spriteNavLeft;
-        _navRight.sprite = isFavoritesSelected ? null : _spriteNavRight;
+        _navLeft.sprite = isMainSelected ? _spriteNavLeft : null;
+        _navRight.sprite = isFavoritesSelected ? _spriteNavRight : null;
         _navLeft.color = Color.white;
         _navRight.color = Color.white;
     }
